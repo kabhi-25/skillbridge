@@ -31,10 +31,10 @@ describe("Isolated Authentication Service", () => {
     expect(session?.email).toBe(DEMO_CREDENTIALS.email);
   });
 
-  it("rejects login with incorrect password", async () => {
+  it("rejects login with incorrect password with generic error message", async () => {
     const result = await loginUser(DEMO_CREDENTIALS.email, "WrongPassword999!");
     expect(result.success).toBe(false);
-    expect(result.error).toContain("Incorrect password");
+    expect(result.error).toBe("Invalid email or password.");
   });
 
   it("registers a new student account with validation and password hashing", async () => {
@@ -118,7 +118,7 @@ describe("Isolated Authentication Service", () => {
     // Attempting login with default demo password must FAIL
     const breachAttempt = await loginUser("marcus@university.edu", "Password123!");
     expect(breachAttempt.success).toBe(false);
-    expect(breachAttempt.error).toContain("Incorrect password");
+    expect(breachAttempt.error).toBe("Invalid email or password.");
 
     // Login with actual password succeeds
     const legitLogin = await loginUser("marcus@university.edu", "MarcusUniquePass99!");
@@ -128,10 +128,15 @@ describe("Isolated Authentication Service", () => {
   it("validates empty and short input values for login and registration", async () => {
     const emptyEmail = await loginUser("", "Password123!");
     expect(emptyEmail.success).toBe(false);
+    expect(emptyEmail.error).toBe("Invalid email or password.");
 
     const shortPass = await loginUser("valid@test.edu", "123");
     expect(shortPass.success).toBe(false);
-    expect(shortPass.error).toContain("at least 6 characters");
+    expect(shortPass.error).toBe("Invalid email or password.");
+
+    const shortRegisterPass = await registerUser("Valid Name", "valid@test.edu", "123", "123");
+    expect(shortRegisterPass.success).toBe(false);
+    expect(shortRegisterPass.error).toContain("at least 6 characters");
 
     const shortName = await registerUser("A", "valid@test.edu", "Password123!", "Password123!");
     expect(shortName.success).toBe(false);

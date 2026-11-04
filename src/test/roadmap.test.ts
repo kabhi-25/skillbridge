@@ -9,7 +9,7 @@ describe("Roadmap Generation Logic", () => {
   it("generates an activity for each skill gap", () => {
     // Zero proficiency creates gaps for all requirements
     const matchResult = calculateRoleMatch(frontendRole, DEFAULT_SKILLS, {});
-    const activities = generateRoadmapActivities(frontendRole, DEFAULT_SKILLS, matchResult.gaps);
+    const activities = generateRoadmapActivities(frontendRole, matchResult.gaps, DEFAULT_SKILLS);
 
     expect(activities.length).toBe(matchResult.gaps.length);
     expect(activities.length).toBeGreaterThan(0);
@@ -36,7 +36,7 @@ describe("Roadmap Generation Logic", () => {
       collaboration: 3,
     };
     const matchResult = calculateRoleMatch(frontendRole, DEFAULT_SKILLS, perfectLevels);
-    const activities = generateRoadmapActivities(frontendRole, DEFAULT_SKILLS, matchResult.gaps);
+    const activities = generateRoadmapActivities(frontendRole, matchResult.gaps);
 
     expect(activities).toHaveLength(0);
   });

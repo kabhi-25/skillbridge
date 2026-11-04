@@ -16,7 +16,7 @@ describe("SkillBridge Full Workspace Integration Tests", () => {
     expect(await screen.findByRole("heading", { name: /welcome back/i })).toBeInTheDocument();
     expect(screen.getByPlaceholderText(/name@university.edu/i)).toBeInTheDocument();
     expect(screen.getByPlaceholderText(/minimum 6 characters/i)).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /auto-fill credentials/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /use demo account/i })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /sign in to skillbridge/i })).toBeInTheDocument();
   });
 
@@ -41,7 +41,7 @@ describe("SkillBridge Full Workspace Integration Tests", () => {
   it("logs in via autofill and renders the authenticated dashboard overview", async () => {
     render(<Component />);
 
-    const autofillBtn = await screen.findByRole("button", { name: /auto-fill credentials/i });
+    const autofillBtn = await screen.findByRole("button", { name: /use demo account/i });
     fireEvent.click(autofillBtn);
 
     const emailInput = screen.getByPlaceholderText(/name@university.edu/i) as HTMLInputElement;
@@ -61,7 +61,7 @@ describe("SkillBridge Full Workspace Integration Tests", () => {
     render(<Component />);
 
     // Login first
-    fireEvent.click(await screen.findByRole("button", { name: /auto-fill credentials/i }));
+    fireEvent.click(await screen.findByRole("button", { name: /use demo account/i }));
     fireEvent.click(screen.getByRole("button", { name: /sign in to skillbridge/i }));
     await screen.findByText(/best role match/i);
 
@@ -97,7 +97,7 @@ describe("SkillBridge Full Workspace Integration Tests", () => {
     render(<Component />);
 
     // Login
-    fireEvent.click(await screen.findByRole("button", { name: /auto-fill credentials/i }));
+    fireEvent.click(await screen.findByRole("button", { name: /use demo account/i }));
     fireEvent.click(screen.getByRole("button", { name: /sign in to skillbridge/i }));
     await screen.findByText(/best role match/i);
 
@@ -120,7 +120,7 @@ describe("SkillBridge Full Workspace Integration Tests", () => {
     render(<Component />);
 
     // Login
-    fireEvent.click(await screen.findByRole("button", { name: /auto-fill credentials/i }));
+    fireEvent.click(await screen.findByRole("button", { name: /use demo account/i }));
     fireEvent.click(screen.getByRole("button", { name: /sign in to skillbridge/i }));
     await screen.findByText(/best role match/i);
 
@@ -155,7 +155,7 @@ describe("SkillBridge Full Workspace Integration Tests", () => {
     render(<Component />);
 
     // Login
-    fireEvent.click(await screen.findByRole("button", { name: /auto-fill credentials/i }));
+    fireEvent.click(await screen.findByRole("button", { name: /use demo account/i }));
     fireEvent.click(screen.getByRole("button", { name: /sign in to skillbridge/i }));
     await screen.findByText(/best role match/i);
 

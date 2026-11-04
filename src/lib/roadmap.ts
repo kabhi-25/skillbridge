@@ -203,8 +203,8 @@ const SKILL_ACTIVITIES: Record<
  */
 export function generateRoadmapActivities(
   role: Role,
-  skillsCatalogue: Skill[] = [],
   gaps: SkillGapItem[],
+  skillsCatalogue: Skill[] = [],
 ): RoadmapActivity[] {
   const catalogueMap = new Map<string, Skill>(skillsCatalogue.map((skill) => [skill.id, skill]));
 

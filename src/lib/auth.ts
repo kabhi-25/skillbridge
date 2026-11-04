@@ -1,11 +1,16 @@
 /**
- * SkillBridge Isolated Authentication Service
+ * ============================================================================
+ * CLIENT-SIDE DEMO AUTHENTICATION ONLY — NOT FOR PRODUCTION USE
+ * ============================================================================
+ * This module is a client-side authentication simulation engineered solely for
+ * local evaluation, UI state demonstration, and multi-user data isolation.
  *
- * NOTE FOR PORTFOLIO REVIEWERS:
- * This is a local demo authentication layer providing real client-side validation,
- * password hashing (SHA-256 via Web Crypto API), session persistence, and multi-user
- * data isolation. It does not replace an enterprise OAuth/OIDC/backend provider,
- * but allows demonstration of login, registration, validation, and user-isolated state.
+ * In a production system:
+ * 1. Passwords must never be verified in the browser or exposed to client memory.
+ * 2. Authentication must be handled by a secure backend or an identity provider
+ *    (e.g., OAuth 2.0 / OIDC, Auth0, Clerk, Supabase Auth).
+ * 3. Sessions must be managed via secure, HttpOnly, SameSite cookies or signed JWTs.
+ * ============================================================================
  */
 
 export interface User {
@@ -26,83 +31,96 @@ interface StoredAccount {
 
 const AUTH_STORAGE_KEY = "skillbridge_demo_auth_session_v1";
 const ACCOUNTS_STORAGE_KEY = "skillbridge_demo_accounts_v1";
-const DEMO_SALT = "skillbridge_secure_demo_salt_2026";
+const PBKDF2_ITERATIONS = 100_000;
 
 /**
- * SHA-256 password hashing utility using Web Crypto API.
- * Never stores plaintext passwords in localStorage.
+ * Pre-seeded demo account constants.
+ * Seeded dynamically at runtime with a fresh PBKDF2 salt and hash.
  */
-async function hashPassword(password: string, salt: string): Promise<string> {
-  if (typeof window === "undefined" || !window.crypto?.subtle) {
-    // Fallback for SSR or non-browser environments
-    let hash = 0;
-    const combined = salt + password;
-    for (let i = 0; i < combined.length; i++) {
-      hash = (hash << 5) - hash + combined.charCodeAt(i);
-      hash |= 0;
-    }
-    return `fallback_${Math.abs(hash).toString(16)}`;
-  }
-
-  const msgBuffer = new TextEncoder().encode(`${salt}::${password}`);
-  const hashBuffer = await window.crypto.subtle.digest("SHA-256", msgBuffer);
-  const hashArray = Array.from(new Uint8Array(hashBuffer));
-  return hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
-}
-
-/**
- * Pre-seeded demo account for easy test evaluation.
- */
-const DEFAULT_DEMO_ACCOUNT: StoredAccount = {
-  id: "demo-student-001",
-  name: "Alex Chen",
+export const DEMO_CREDENTIALS = {
   email: "alex.chen@student.edu",
-  // Hash for "Password123!" with DEMO_SALT
-  passwordHash: "4c0b791a2358f9d0d53587750fd50c9edac96b5179a1226e5c5ac2bc036b6f2b",
-  salt: DEMO_SALT,
-  createdAt: "2026-10-10T12:00:00.000Z",
+  password: "Password123!",
+  name: "Alex Chen",
 };
 
 /**
- * Generates a cryptographically secure random salt using Web Crypto when available.
+ * Derives a PBKDF2 hash using HMAC-SHA-256 with 100,000 iterations.
+ * Fails safely if Web Crypto API is unavailable.
+ */
+async function hashPassword(password: string, saltHex: string): Promise<string> {
+  const subtle = typeof window !== "undefined" ? window.crypto?.subtle : globalThis.crypto?.subtle;
+  if (!subtle) {
+    throw new Error(
+      "Web Crypto API (crypto.subtle) is required for password hashing but is unavailable.",
+    );
+  }
+
+  const saltBytes = new Uint8Array(
+    saltHex.match(/.{1,2}/g)?.map((byte) => parseInt(byte, 16)) ?? [],
+  );
+
+  const enc = new TextEncoder();
+  const keyMaterial = await subtle.importKey(
+    "raw",
+    enc.encode(password),
+    { name: "PBKDF2" },
+    false,
+    ["deriveBits"],
+  );
+
+  const derivedBits = await subtle.deriveBits(
+    {
+      name: "PBKDF2",
+      salt: saltBytes,
+      iterations: PBKDF2_ITERATIONS,
+      hash: "SHA-256",
+    },
+    keyMaterial,
+    256, // 32 bytes (256 bits)
+  );
+
+  return Array.from(new Uint8Array(derivedBits))
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("");
+}
+
+/**
+ * Generates a cryptographically random 16-byte salt as a hex string.
+ * Fails safely if crypto.getRandomValues is unavailable.
  */
 function generateSalt(): string {
-  if (typeof window !== "undefined" && window.crypto?.getRandomValues) {
-    const array = new Uint8Array(16);
-    window.crypto.getRandomValues(array);
-    return Array.from(array, (byte) => byte.toString(16).padStart(2, "0")).join("");
+  const cryptoObj = typeof window !== "undefined" ? window.crypto : globalThis.crypto;
+  if (!cryptoObj?.getRandomValues) {
+    throw new Error("Cryptographically secure random number generation is unavailable.");
   }
-  return `salt_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+  const array = new Uint8Array(16);
+  cryptoObj.getRandomValues(array);
+  return Array.from(array, (byte) => byte.toString(16).padStart(2, "0")).join("");
 }
 
-export const DEMO_CREDENTIALS = {
-  email:
-    (typeof import.meta !== "undefined" && import.meta.env?.VITE_DEMO_USER_EMAIL) ||
-    "alex.chen@student.edu",
-  password:
-    (typeof import.meta !== "undefined" && import.meta.env?.VITE_DEMO_USER_PASSWORD) ||
-    "Password123!",
-  name: "Alex Chen",
-};
+/**
+ * Generates a UUID for new users using crypto.randomUUID().
+ */
+function generateUserId(): string {
+  const cryptoObj = typeof window !== "undefined" ? window.crypto : globalThis.crypto;
+  if (typeof cryptoObj?.randomUUID === "function") {
+    return cryptoObj.randomUUID();
+  }
+  throw new Error("crypto.randomUUID is not supported in this environment.");
+}
 
 function getStoredAccounts(): StoredAccount[] {
   if (typeof window === "undefined" || !window.localStorage) {
-    return [DEFAULT_DEMO_ACCOUNT];
+    return [];
   }
 
   try {
     const raw = window.localStorage.getItem(ACCOUNTS_STORAGE_KEY);
-    if (!raw) {
-      window.localStorage.setItem(ACCOUNTS_STORAGE_KEY, JSON.stringify([DEFAULT_DEMO_ACCOUNT]));
-      return [DEFAULT_DEMO_ACCOUNT];
-    }
+    if (!raw) return [];
     const accounts = JSON.parse(raw);
-    if (Array.isArray(accounts) && accounts.length > 0) {
-      return accounts;
-    }
-    return [DEFAULT_DEMO_ACCOUNT];
+    return Array.isArray(accounts) ? accounts : [];
   } catch {
-    return [DEFAULT_DEMO_ACCOUNT];
+    return [];
   }
 }
 
@@ -113,6 +131,35 @@ function saveStoredAccounts(accounts: StoredAccount[]): void {
   } catch {
     // Ignore storage quota errors
   }
+}
+
+/**
+ * Ensures the demo student account exists at runtime, seeded dynamically from constants.
+ */
+async function ensureDemoAccount(): Promise<StoredAccount[]> {
+  const accounts = getStoredAccounts();
+  const existing = accounts.find(
+    (acc) => acc.email.toLowerCase() === DEMO_CREDENTIALS.email.toLowerCase(),
+  );
+
+  if (existing) {
+    return accounts;
+  }
+
+  const salt = generateSalt();
+  const passwordHash = await hashPassword(DEMO_CREDENTIALS.password, salt);
+  const demoAccount: StoredAccount = {
+    id: "demo-student-001",
+    name: DEMO_CREDENTIALS.name,
+    email: DEMO_CREDENTIALS.email.toLowerCase(),
+    passwordHash,
+    salt,
+    createdAt: "2026-10-10T12:00:00.000Z",
+  };
+
+  accounts.unshift(demoAccount);
+  saveStoredAccounts(accounts);
+  return accounts;
 }
 
 /**
@@ -151,33 +198,36 @@ export function isValidEmail(email: string): boolean {
 
 /**
  * Authenticates a user with email and password.
+ * Returns a single generic error on failure to prevent username enumeration.
  */
 export async function loginUser(
   email: string,
   password: string,
 ): Promise<{ success: boolean; user?: User; error?: string }> {
+  const GENERIC_ERROR = "Invalid email or password.";
   const normalizedEmail = email.trim().toLowerCase();
 
   if (!normalizedEmail || !isValidEmail(normalizedEmail) || normalizedEmail.length > 100) {
-    return { success: false, error: "Please enter a valid email address." };
+    return { success: false, error: GENERIC_ERROR };
   }
   if (!password || password.length < 6 || password.length > 128) {
-    return { success: false, error: "Password must be at least 6 characters long." };
+    return { success: false, error: GENERIC_ERROR };
   }
 
-  const accounts = getStoredAccounts();
+  const accounts = await ensureDemoAccount();
   const account = accounts.find((acc) => acc.email.toLowerCase() === normalizedEmail);
 
   if (!account) {
-    return {
-      success: false,
-      error: "No account found with this email. Please check your credentials or register.",
-    };
+    return { success: false, error: GENERIC_ERROR };
   }
 
-  const computedHash = await hashPassword(password, account.salt);
-  if (computedHash !== account.passwordHash) {
-    return { success: false, error: "Incorrect password. Please try again." };
+  try {
+    const computedHash = await hashPassword(password, account.salt);
+    if (computedHash !== account.passwordHash) {
+      return { success: false, error: GENERIC_ERROR };
+    }
+  } catch {
+    return { success: false, error: GENERIC_ERROR };
   }
 
   const user: User = {
@@ -223,7 +273,7 @@ export async function registerUser(
     return { success: false, error: "Passwords do not match." };
   }
 
-  const accounts = getStoredAccounts();
+  const accounts = await ensureDemoAccount();
   const existing = accounts.find((acc) => acc.email.toLowerCase() === normalizedEmail);
   if (existing) {
     return {
@@ -234,7 +284,7 @@ export async function registerUser(
 
   const salt = generateSalt();
   const passwordHash = await hashPassword(password, salt);
-  const newId = `user_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
+  const newId = generateUserId();
 
   const newAccount: StoredAccount = {
     id: newId,
