@@ -203,34 +203,39 @@ const SKILL_ACTIVITIES: Record<
  */
 export function generateRoadmapActivities(
   role: Role,
-  skillsCatalogue: Skill[],
+  skillsCatalogue: Skill[] = [],
   gaps: SkillGapItem[],
 ): RoadmapActivity[] {
+  const catalogueMap = new Map<string, Skill>(skillsCatalogue.map((skill) => [skill.id, skill]));
+
   return gaps.map((gap, index) => {
     const predefined = SKILL_ACTIVITIES[gap.skillId];
+    const catalogItem = catalogueMap.get(gap.skillId);
+    const resolvedSkillName = gap.skillName || catalogItem?.name || gap.skillId;
     const duration = index === 0 ? "2–3 hours" : "1–2 hours";
 
     const title =
       predefined?.title ??
-      `Hands-on practice: ${gap.skillName} (Level ${gap.currentLevel} → ${gap.requiredLevel})`;
+      `Hands-on practice: ${resolvedSkillName} (Level ${gap.currentLevel} → ${gap.requiredLevel})`;
     const detail =
       predefined?.detail ??
-      `Build a focused mini-project demonstrating practical competence in ${gap.skillName}.`;
+      `Build a focused mini-project demonstrating practical competence in ${resolvedSkillName}.`;
     const objectives = predefined?.objectives ?? [
-      `Review key fundamentals of ${gap.skillName}`,
+      `Review key fundamentals of ${resolvedSkillName}`,
       `Implement practical code examples meeting Level ${gap.requiredLevel} standards`,
       `Document the learnings in your portfolio repository`,
     ];
     const practicalExercise =
       predefined?.practicalExercise ??
-      `Create a standalone demo project in your workspace showcasing ${gap.skillName}.`;
+      `Create a standalone demo project in your workspace showcasing ${resolvedSkillName}.`;
     const recommendedTopic =
-      predefined?.recommendedTopic ?? `Curated learning path: ${gap.skillName} core documentation`;
+      predefined?.recommendedTopic ??
+      `Curated learning path: ${resolvedSkillName} core documentation`;
 
     return {
       id: `${role.id}::${gap.skillId}`,
       skillId: gap.skillId,
-      skillName: gap.skillName,
+      skillName: resolvedSkillName,
       roleId: role.id,
       currentLevel: gap.currentLevel,
       targetLevel: gap.requiredLevel,

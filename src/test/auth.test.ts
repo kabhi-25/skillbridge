@@ -137,4 +137,10 @@ describe("Isolated Authentication Service", () => {
     expect(shortName.success).toBe(false);
     expect(shortName.error).toContain("at least 2 characters");
   });
+
+  it("rejects oversized input to prevent memory bloat", async () => {
+    const longName = "A".repeat(80);
+    const result = await registerUser(longName, "valid@test.edu", "Password123!", "Password123!");
+    expect(result.success).toBe(false);
+  });
 });

@@ -20,9 +20,7 @@ import {
   Layers,
   LayoutDashboard,
   ListChecks,
-  Lock,
   LogOut,
-  Mail,
   Menu,
   PanelLeftClose,
   Plus,
@@ -34,7 +32,6 @@ import {
   Target,
   Trash2,
   TrendingUp,
-  User as UserIcon,
   X,
 } from "lucide-react";
 
@@ -62,8 +59,6 @@ import studyWorkspace from "@/assets/skill-workspace.jpg";
 
 import {
   DEFAULT_ROLES,
-  DEFAULT_SKILLS,
-  AVAILABLE_ADDITIONAL_SKILLS,
   getFullSkillCatalogue,
   createCustomSkill,
   LEVEL_NAMES,
@@ -72,15 +67,9 @@ import {
   type Skill,
   type SkillGroup,
 } from "@/data/catalogue";
-import {
-  calculateRoleMatch,
-  rankRoles,
-  type RoleMatchResult,
-  type SkillGapItem,
-} from "@/lib/matching";
+import { calculateRoleMatch, rankRoles, type RoleMatchResult } from "@/lib/matching";
 import { generateRoadmapActivities, type RoadmapActivity } from "@/lib/roadmap";
 import {
-  getDefaultUserState,
   loadPersistedState,
   loadSidebarCollapsedPreference,
   resetPersistedState,

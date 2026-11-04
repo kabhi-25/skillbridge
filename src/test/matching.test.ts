@@ -118,4 +118,52 @@ describe("Transparent Matching Engine", () => {
     expect(ranked[0]?.match.score).toBeGreaterThanOrEqual(ranked[1]?.match.score ?? 0);
     expect(ranked[1]?.match.score).toBeGreaterThanOrEqual(ranked[2]?.match.score ?? 0);
   });
+
+  it("clamps credits when student proficiency exceeds requirements", () => {
+    const singleSkillRole: Role = {
+      id: "single-skill-role",
+      title: "Single Skill Role",
+      team: "Dev",
+      workStyle: "Remote",
+      category: "Frontend",
+      description: "Testing level clamping",
+      icon: "code",
+      requirements: {
+        javascript: 1,
+      },
+    };
+
+    // Student has level 3, but required is 1
+    const result = calculateRoleMatch(singleSkillRole, DEFAULT_SKILLS, { javascript: 3 });
+    expect(result.score).toBe(100);
+    expect(result.matchedSkills[0]?.ratio).toBe(1);
+    expect(result.gaps).toHaveLength(0);
+  });
+
+  it("sorts skill gaps with highest gap magnitude first, then by required level", () => {
+    const multiGapRole: Role = {
+      id: "gap-test-role",
+      title: "Gap Test Role",
+      team: "QA",
+      workStyle: "Remote",
+      category: "Frontend",
+      description: "Testing gap sorting order",
+      icon: "code",
+      requirements: {
+        skillA: 3, // current 2 -> gap 1, req 3
+        skillB: 3, // current 0 -> gap 3, req 3
+        skillC: 2, // current 1 -> gap 1, req 2
+      },
+    };
+
+    const result = calculateRoleMatch(multiGapRole, DEFAULT_SKILLS, {
+      skillA: 2,
+      skillB: 0,
+      skillC: 1,
+    });
+
+    expect(result.gaps[0]?.skillId).toBe("skillB"); // largest gap: 3
+    expect(result.gaps[1]?.skillId).toBe("skillA"); // gap 1, required 3
+    expect(result.gaps[2]?.skillId).toBe("skillC"); // gap 1, required 2
+  });
 });

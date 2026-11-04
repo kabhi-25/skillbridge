@@ -63,9 +63,25 @@ const DEFAULT_DEMO_ACCOUNT: StoredAccount = {
   createdAt: "2026-10-10T12:00:00.000Z",
 };
 
+/**
+ * Generates a cryptographically secure random salt using Web Crypto when available.
+ */
+function generateSalt(): string {
+  if (typeof window !== "undefined" && window.crypto?.getRandomValues) {
+    const array = new Uint8Array(16);
+    window.crypto.getRandomValues(array);
+    return Array.from(array, (byte) => byte.toString(16).padStart(2, "0")).join("");
+  }
+  return `salt_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+}
+
 export const DEMO_CREDENTIALS = {
-  email: "alex.chen@student.edu",
-  password: "Password123!",
+  email:
+    (typeof import.meta !== "undefined" && import.meta.env?.VITE_DEMO_USER_EMAIL) ||
+    "alex.chen@student.edu",
+  password:
+    (typeof import.meta !== "undefined" && import.meta.env?.VITE_DEMO_USER_PASSWORD) ||
+    "Password123!",
   name: "Alex Chen",
 };
 
@@ -142,10 +158,10 @@ export async function loginUser(
 ): Promise<{ success: boolean; user?: User; error?: string }> {
   const normalizedEmail = email.trim().toLowerCase();
 
-  if (!normalizedEmail || !isValidEmail(normalizedEmail)) {
+  if (!normalizedEmail || !isValidEmail(normalizedEmail) || normalizedEmail.length > 100) {
     return { success: false, error: "Please enter a valid email address." };
   }
-  if (!password || password.length < 6) {
+  if (!password || password.length < 6 || password.length > 128) {
     return { success: false, error: "Password must be at least 6 characters long." };
   }
 
@@ -194,13 +210,13 @@ export async function registerUser(
   const trimmedName = name.trim();
   const normalizedEmail = email.trim().toLowerCase();
 
-  if (!trimmedName || trimmedName.length < 2) {
+  if (!trimmedName || trimmedName.length < 2 || trimmedName.length > 70) {
     return { success: false, error: "Please enter your full name (at least 2 characters)." };
   }
-  if (!normalizedEmail || !isValidEmail(normalizedEmail)) {
+  if (!normalizedEmail || !isValidEmail(normalizedEmail) || normalizedEmail.length > 100) {
     return { success: false, error: "Please enter a valid email address." };
   }
-  if (!password || password.length < 6) {
+  if (!password || password.length < 6 || password.length > 128) {
     return { success: false, error: "Password must be at least 6 characters long." };
   }
   if (password !== confirmPassword) {
@@ -216,7 +232,7 @@ export async function registerUser(
     };
   }
 
-  const salt = `salt_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+  const salt = generateSalt();
   const passwordHash = await hashPassword(password, salt);
   const newId = `user_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
 

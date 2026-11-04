@@ -1,226 +1,237 @@
 # SkillBridge — Student Skill-to-Role Matching Workspace
 
-> An interactive, data-driven skill evaluation and career roadmap workspace designed for Computer Science and Engineering (CSE) students. Compare self-reported technical proficiencies against realistic early-career roles, pinpoint skill gaps, and follow structured learning activities.
+> An interactive, data-driven skill gap evaluator and structured career roadmap generator for Computer Science & Engineering (CSE) students.
+
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.8-blue?logo=typescript)](https://www.typescriptlang.org/)
+[![React](https://img.shields.io/badge/React-19-61dafb?logo=react)](https://react.dev/)
+[![TailwindCSS](https://img.shields.io/badge/TailwindCSS-v4-38bdf8?logo=tailwindcss)](https://tailwindcss.com/)
+[![Vitest](https://img.shields.io/badge/Vitest-Passing-green?logo=vitest)](https://vitest.dev/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 ---
 
 ## 🎯 Problem Statement
 
-Early-career engineering students often struggle to understand how university coursework and personal coding projects align with industry role expectations. Job descriptions are frequently ambiguous or overwhelming, making it difficult to determine:
+Early-career engineering students and graduates often struggle to bridge the gap between academic coursework and real-world tech industry expectations:
 
-1. Which technical skills are mandatory versus optional for specific roles.
-2. Where the student's current proficiency stands relative to entry-level expectations.
-3. What concrete, practical project or exercise to build next to close the gap.
+1. **Vague Job Descriptions**: Postings contain buzzword-heavy requirements that make it hard to tell what skills are strictly necessary versus "nice-to-have".
+2. **Ambiguous Proficiency**: Students don't know where their self-taught or university knowledge lands relative to entry-level industry expectations.
+3. **Action Paralysis**: After realizing a skill gap, students often lack an actionable, project-based curriculum to systematically close it.
 
-**SkillBridge** solves this by providing a quiet, transparent, local-first evaluation workspace. It compares current proficiencies against curated industry benchmarks, calculates normalized match scores with clear explanations, and generates ordered project-based learning roadmaps.
+**SkillBridge** solves this with a deterministic, local-first evaluation workspace. It compares current proficiencies against curated industry benchmarks, calculates normalized match scores with clear explanations, and generates ordered project-based learning roadmaps.
 
 ---
 
-## ✨ Main Features
+## ✨ Key Features
 
 - **📊 Data-Driven Overview Workspace**:
-  - Live metric snapshots: best role match %, target goal gaps, and roadmap momentum.
+  - Live metric snapshots: Best role match %, target goal gaps, and roadmap completion momentum.
   - Ranked role cards dynamically ordered by match percentage.
   - "Strongest Opportunities" highlighting top skill gaps with one-click transitions to skill rating.
-  - Preview of upcoming personalized learning activities.
+  - Immediate preview of upcoming practical learning milestones.
 
 - **🧭 Explore Roles Workspace**:
-  - Curated, realistic engineering benchmarks (Frontend Developer, Full-Stack Developer, UI Engineer, Backend Developer).
-  - Search by role title, engineering team, work style, or technical stack.
-  - Filter pills by engineering discipline (All, Frontend, Full-Stack, Backend).
-  - Explicit disclaimer identifying roles as curated benchmarks rather than unverified live vacancies.
-  - One-click target goal selection immediately updating metrics across all workspaces.
+  - Curated, realistic engineering benchmarks: Frontend Developer, Full-Stack Developer, UI Engineer, Backend Developer.
+  - Real-time search across role title, engineering team, work style, and technical requirements.
+  - Filter pills by engineering discipline (_All_, _Frontend_, _Full-Stack_, _Backend_).
+  - One-click target goal selection immediately updating metrics across all views.
 
-- **🔐 Login & Registration Experience**:
-  - Gated student dashboard requiring authentication before workspace access.
-  - Login view with email, password, and show/hide password toggles.
-  - Registration view with full name, student email, password, and password confirmation checks.
-  - Client-side validation and responsive error banners.
-  - "Auto-fill credentials" button for 1-click evaluation of the pre-seeded student account.
+- **🔐 Gated Authentication & User Isolation**:
+  - Client-side authentication module (`src/lib/auth.ts`) utilizing Web Crypto SHA-256 password hashing.
   - Multi-user data isolation: separate student accounts have independent skill levels, goals, and roadmaps.
-  - Isolated authentication module (`src/lib/auth.ts`) utilizing Web Crypto SHA-256 password hashing (passwords are never stored in plaintext).
-  - Clean logout action with confirmation modal.
+  - Pre-seeded demo account for 1-click recruiter evaluation (`alex.chen@student.edu` / `Password123!`).
 
 - **🎛️ My Skills Workspace & Skill Management**:
-  - Categorized CSE technical skills in _Frontend_, _Tools & practices_, and _Backend_.
-  - **Add Skill Modal**:
-    - Searchable selection from an extended catalogue of skills (e.g. Tailwind CSS, Next.js, Docker, Python & FastAPI, PostgreSQL, GraphQL, etc.).
-    - Custom skill creator allowing students to add arbitrary engineering skills and categories.
-    - Initial proficiency rating selector.
-    - Duplicate prevention check (cannot add skills already in profile).
-  - **Remove Skill Action**:
-    - Accessible remove button on each skill row with an `AlertDialog` confirmation.
-    - Immediately recalculates role match scores, skill gaps, and roadmap activities upon removal.
-  - Consistent 4-tier proficiency model:
-    - **0 — Not yet (Beginner)**: Little to no exposure.
-    - **1 — Learning (Developing)**: Fundamental concepts understood; follows guided tutorials.
-    - **2 — Comfortable (Intermediate)**: Builds independently; troubleshoots routine issues.
-    - **3 — Confident (Advanced)**: Deep architectural understanding; writes tests and explains trade-offs.
-  - Filter tabs: _All profile skills_, _Required for goal_, and _Skills needing focus_.
-  - Confirmation dialog to reset skills to demo baseline.
+  - Categorized CSE technical skills across _Frontend_, _Tools & practices_, and _Backend_.
+  - Standardized 4-tier proficiency model:
+    - `0 — Not yet (Beginner)`: No exposure or fundamentals only.
+    - `1 — Learning (Developing)`: Understands concepts; completes guided tutorials.
+    - `2 — Comfortable (Intermediate)`: Builds independently; resolves typical bugs.
+    - `3 — Confident (Advanced)`: Deep architectural grasp; writes clean tests.
+  - **Custom Skill Creator**: Add arbitrary engineering skills and categories.
+  - **Extended Catalogue Modal**: Choose from optional skills (Tailwind, Next.js, Docker, Python, PostgreSQL, GraphQL).
 
 - **🗺️ Personalized Learning Roadmap**:
-  - Dynamically generated activities specifically addressing the student's skill gaps for the selected target role.
-  - Each activity includes:
-    - Current vs target level badge.
-    - Estimated duration (e.g., 2–3 hours).
-    - Structured learning objectives (bullet points).
-    - Practical, project-based portfolio exercise.
-    - Curated curriculum reading / documentation recommendation (no broken external links).
-    - "Full Project Guide" modal detailing step-by-step guidance.
-  - Interactive completion toggle with progress bar tracking.
-  - Empty state with guidance when all requirements are fully satisfied.
-  - Roadmap restart action with confirmation dialog.
+  - Dynamically generated activities specifically targeting the student's gaps for their selected target role.
+  - Detailed task breakdown: estimated duration, core learning objectives, practical exercise instructions, and documentation links.
+  - Step-by-step modal guide for hands-on portfolio implementation.
+  - Interactive completion tracking with progress bars.
 
-- **💾 Multi-User Local Storage Persistence**:
-  - All user state (selected role, skill levels, active skills, custom skills, completed roadmap milestones) is isolated per user under `skillbridge_student_state_v2_{userId}` in browser `localStorage`.
-  - SSR hydration-safe with zero flash of unstyled content or hydration mismatch.
-  - Complete "Reset demo data" action with modal confirmation.
+- **💾 SSR-Safe Local Persistence**:
+  - User state persisted in browser `localStorage` with versioned migrations (`v2`).
+  - Zero hydration flash or layout shift during server-side rendering.
 
 ---
 
-## 🧮 Transparent Matching Engine
+## 🏛️ System Architecture & Data Flow
+
+```mermaid
+flowchart TD
+    User([Student / Recruiter]) --> Auth[Gated Auth Screen]
+    Auth -->|Validates Session| Storage[(LocalStorage: Isolated User State)]
+    Storage --> Workspace[SkillBridge Workspace Shell]
+
+    subgraph Core Engine
+        Catalogue[(Roles & Skills Catalogue)]
+        Matching[Matching Engine: calculateRoleMatch]
+        Roadmap[Roadmap Generator: generateRoadmapActivities]
+    end
+
+    Workspace --> Matching
+    Catalogue --> Matching
+    Storage --> Matching
+
+    Matching -->|Normalized Score 0..100| Overview[Overview Dashboard]
+    Matching -->|Ranked Benchmarks| Explore[Explore Roles View]
+    Matching -->|Identified Gaps| Roadmap
+
+    Roadmap -->|Ordered Projects| RoadmapView[Your Roadmap View]
+    Workspace --> SkillsView[My Skills Management View]
+    SkillsView -->|Update Proficiency| Storage
+```
+
+---
+
+## 🧮 Matching Engine Formula
 
 The match scoring algorithm (`src/lib/matching.ts`) is deterministic, transparent, and educational:
 
 $$\text{Score} = \text{round}\left( \frac{\sum_{i=1}^{N} \min\left(\text{CurrentLevel}_i, \text{RequiredLevel}_i\right) / \text{RequiredLevel}_i}{N} \times 100 \right)$$
 
-### Key Properties:
-
-1. **Normalized Range**: Always outputs an integer between 0 and 100.
-2. **Proportional Credit**: Partial proficiency earns partial credit (e.g., Level 1 toward a Level 2 requirement grants 50% credit for that skill).
-3. **Equal Skill Weighting**: Every requirement in a role contributes $1/N$ of the total score.
-4. **Resilient Edge Case Handling**: Safe against division-by-zero (empty requirements yield 100%), unknown skill IDs, and out-of-range ratings.
-5. **Clear Explanation**: Generates plain-English breakdowns (e.g., _"7 of 9 skills fully met, 2 in progress, and 0 to begin"_).
-
-> **Note**: The match score is an educational navigation benchmark to guide study priorities, not a hiring prediction or probability of employment.
+- **Equal Weighting**: Every requirement in a role contributes $1/N$ of the total score.
+- **Proportional Credit**: Partial proficiency earns proportional credit (e.g. Level 1 toward a Level 2 requirement gives 50% credit for that skill).
+- **Safety**: Robust against empty requirement sets, missing catalog entries, and out-of-range user input.
 
 ---
 
 ## 🛠️ Technology Stack
 
-| Layer            | Technology                                                                                    |
-| ---------------- | --------------------------------------------------------------------------------------------- |
-| **Framework**    | [TanStack Start](https://tanstack.com/start) + [TanStack Router](https://tanstack.com/router) |
-| **Language**     | [TypeScript 5.8](https://www.typescriptlang.org/) (Strict mode, strict null checks)           |
-| **UI Library**   | [React 19](https://react.dev/)                                                                |
-| **Styling**      | [Tailwind CSS v4](https://tailwindcss.com/) + CSS Design Tokens (`oklch` palette)             |
-| **Icons**        | [Lucide React](https://lucide.dev/)                                                           |
-| **Primitives**   | [Radix UI](https://www.radix-ui.com/) (`AlertDialog`, `Dialog`, accessible overlays)          |
-| **Testing**      | [Vitest 4](https://vitest.dev/) + React Testing Library + JSDOM                               |
-| **Code Quality** | ESLint 9 + Prettier                                                                           |
+| Layer                      | Technology                                                                                    | Purpose                                                        |
+| :------------------------- | :-------------------------------------------------------------------------------------------- | :------------------------------------------------------------- |
+| **Framework**              | [TanStack Start](https://tanstack.com/start) + [TanStack Router](https://tanstack.com/router) | Full-stack React SSR & type-safe client routing                |
+| **Language**               | [TypeScript 5.8](https://www.typescriptlang.org/)                                             | Strict type checking, interfaces, and discriminated unions     |
+| **UI Library**             | [React 19](https://react.dev/)                                                                | Component architecture, custom hooks, and state management     |
+| **Styling**                | [Tailwind CSS v4](https://tailwindcss.com/)                                                   | Modern utility styling with OKLCH CSS variable design tokens   |
+| **Icons**                  | [Lucide React](https://lucide.dev/)                                                           | Accessible, consistent iconography                             |
+| **Primitives**             | [Radix UI](https://www.radix-ui.com/)                                                         | Accessible dialogs, alert confirmations, and modal focus traps |
+| **Testing**                | [Vitest 4](https://vitest.dev/) + React Testing Library                                       | Deterministic unit and integration test suites (44 tests)      |
+| **Linting & Code Quality** | ESLint 9 + Prettier                                                                           | Style guide compliance and code formatting                     |
 
 ---
 
-## 📁 Project Structure
+## 📸 Screenshots
 
-```
-├── src/
-│   ├── assets/              # Static assets (student-workspace photo)
-│   ├── components/ui/       # Radix UI primitives & controls (alert-dialog, button, dialog)
-│   ├── data/
-│   │   └── catalogue.ts     # Typed CSE skills, roles catalogue, and proficiency metadata
-│   ├── lib/
-│   │   ├── auth.ts          # Demo auth service with Web Crypto SHA-256 password hashing
-│   │   ├── matching.ts      # Transparent matching engine & gap analyzer
-│   │   ├── roadmap.ts       # Dynamic roadmap activity generator & practical tasks
-│   │   ├── storage.ts       # SSR-safe versioned LocalStorage persistence
-│   │   └── utils.ts         # Class merging & utility helpers
-│   ├── routes/
-│   │   ├── __root.tsx       # Root document layout, metadata, and error boundary
-│   │   └── index.tsx        # SkillBridge interactive workspace shell & page views
-│   ├── styles.css           # Global design tokens, OKLCH palette, and component classes
-│   └── test/
-│       ├── app-routing.test.tsx        # Route matching tests
-│       ├── auth.test.ts               # Authentication & password hashing tests
-│       ├── matching.test.ts           # Matching algorithm edge-case tests
-│       ├── roadmap.test.ts            # Roadmap generation tests
-│       ├── setup.ts                   # JSDOM test environment mocks
-│       ├── sidebar-navigation.test.ts # Sidebar collapse preference & transitions tests
-│       ├── skills-management.test.ts  # Add & remove skills tests
-│       └── storage.test.ts            # Persistence & fallback tests
-├── .env.example             # Optional environment variable template
-├── package.json             # Dependencies and npm scripts
-├── tsconfig.json            # TypeScript configuration (strict checks)
-├── vite.config.ts           # Vite + TanStack Start configuration
-└── README.md                # Project documentation
-```
+|                   Overview Dashboard                    |                       Explore Roles                        |
+| :-----------------------------------------------------: | :--------------------------------------------------------: |
+| ![SkillBridge Overview](src/assets/skill-workspace.jpg) | _Role exploration with live search and category filtering_ |
+
+|               My Skills Matrix                |                 Personalized Roadmap                 |
+| :-------------------------------------------: | :--------------------------------------------------: |
+| _Interactive 4-tier skill proficiency rating_ | _Targeted project exercises and step-by-step guides_ |
 
 ---
 
-## 🚀 Getting Started
+## 🚀 Installation & Local Setup
 
 ### Prerequisites
 
-- Node.js v20+ (tested on Node v26)
-- npm v10+
+- **Node.js**: `v20.0.0` or higher (tested on `v26.8.1`)
+- **npm**: `v10.0.0` or higher
 
-### Installation
+### Steps
+
+1. **Clone the repository**:
+
+   ```bash
+   git clone https://github.com/kabhi-25/skillbridge.git
+   cd skillbridge
+   ```
+
+2. **Install dependencies**:
+
+   ```bash
+   npm install
+   ```
+
+3. **Configure environment variables**:
+
+   ```bash
+   cp .env.example .env
+   ```
+
+4. **Start the development server**:
+
+   ```bash
+   npm run dev
+   ```
+
+   Open `http://localhost:8080` (or `http://localhost:5173`) in your browser.
+
+5. **Demo Quick-Login**:
+   - On the login screen, click **"Auto-fill credentials"** to populate the pre-seeded account:
+     - **Email**: `alex.chen@student.edu`
+     - **Password**: `Password123!`
+
+---
+
+## 🧪 Testing & Verification
+
+Run the automated test suite covering authentication, algorithms, persistence, and UI flows:
 
 ```bash
-# Clone the repository
-git clone <repository-url>
-cd skillbridge
-
-# Install dependencies
-npm install
-```
-
-### Running Locally
-
-```bash
-npm run dev
-```
-
-The application will start at `http://localhost:3000` (or `http://localhost:5173` depending on port availability).
-
-### Running Tests
-
-```bash
+# Run all unit and integration tests (44 tests)
 npm test
-```
 
-### Type Checking & Linting
-
-```bash
-# Validate TypeScript
-npx tsc --noEmit
-
-# Run ESLint
+# Run ESLint check
 npm run lint
 
-# Check Prettier formatting
+# Format code with Prettier
 npm run format
-```
 
-### Production Build
-
-```bash
+# Production build test
 npm run build
 ```
 
 ---
 
-## 🔒 Local Persistence, Authentication & Privacy
+## 💡 Engineering Challenges & Solutions
 
-- **Development / Demo Authentication**: SkillBridge provides an isolated client-side authentication service (`src/lib/auth.ts`) with SHA-256 Web Crypto hashing. Passwords are never stored in plaintext. This allows complete local demonstration of login, registration, validation, and multi-user data isolation without requiring third-party cloud credentials or paid APIs.
-- **Account Data Isolation**: Each student account maintains an isolated storage record (`skillbridge_student_state_v2_{userId}`). User progress is not accidentally merged or overwritten across accounts.
-- **Privacy First**: No telemetry, tracking pixels, or remote databases are used.
-- To reset your workspace to fresh demo defaults, click **Reset demo data** in the sidebar.
+### 1. SSR Hydration Mismatches with Dynamic Local Storage
+
+- **Challenge**: Reading browser `localStorage` on initial server-side render causes hydration mismatches or layout shifts.
+- **Solution**: Implemented an SSR-safe container check (`isClientReady` flag) combined with versioned sanitization (`src/lib/storage.ts`) so the initial HTML matches exactly, then hydrates smoothly on the client.
+
+### 2. Multi-Account Data Isolation Without a Remote Backend
+
+- **Challenge**: Demonstrating login/registration workflows for recruiters without standing up an external database.
+- **Solution**: Built an isolated client authentication service using the Web Crypto API (`crypto.subtle.digest("SHA-256")`) with dynamic per-user salt generation. Each student's progress is saved under an isolated key (`skillbridge_student_state_v2_{userId}`), preventing data cross-contamination between accounts.
+
+### 3. Transparent, Deterministic Matching Algorithm
+
+- **Challenge**: Many matching systems use opaque black-box scoring that confuses students about what to study.
+- **Solution**: Created a fully transparent mathematical formula that gives proportional credit for partial competencies and generates plain-English explanations showing met, in-progress, and unstarted skills.
 
 ---
 
-## ⚠️ Known Limitations
+## 🔮 Future Improvements
 
-1. **Demo Authentication Boundary**: The current authentication layer runs locally in the client browser with Web Crypto hashing. It is designed for local portfolio evaluation and is isolated so it can be swapped for a production OAuth 2.0 / OIDC provider (e.g. Auth0, Clerk, or Supabase Auth) in production.
-2. **Device-Local Storage**: Because state is persisted in `localStorage`, student progress is local to the current browser and machine.
-3. **Curated Catalogue**: Roles and skills are curated CSE benchmarks designed for educational alignment, not live job vacancies.
+- [ ] **Cloud Backend Integration**: Optional sync to Supabase / PostgreSQL with OAuth 2.0 (GitHub / Google login).
+- [ ] **Resume / Portfolio Export**: Generate downloadable PDF and Markdown reports of completed roadmap projects.
+- [ ] **Custom Role Builder**: Allow students or professors to paste job descriptions or syllabus requirements to create custom role benchmarks.
+- [ ] **GitHub REST API Verification**: Automatically verify completed roadmap projects by checking public GitHub repository commits.
 
 ---
 
-## 🔮 Future Roadmap Enhancements
+## 👤 Author & Contact
 
-- [ ] Export portfolio summary to PDF / Markdown for resume attachments.
-- [ ] Custom role builder allowing students to paste custom course syllabi or job requirements.
-- [ ] Integration with GitHub REST API to automatically detect project repositories related to roadmap tasks.
-- [ ] Multi-profile support for tracking different career trajectories (e.g. Frontend vs DevOps).
+**Abhishek (kabhi-25)**
+
+- **GitHub**: [@kabhi-25](https://github.com/kabhi-25)
+- **Repository**: [https://github.com/kabhi-25/skillbridge](https://github.com/kabhi-25/skillbridge)
+- **LinkedIn**: [Connect on LinkedIn](https://www.linkedin.com)
+
+---
+
+## 📄 License
+
+This project is licensed under the [MIT License](LICENSE).
